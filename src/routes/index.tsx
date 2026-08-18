@@ -116,8 +116,14 @@ function Index() {
 
   function submit() {
     const cleanStops = stops.map((s) => s.trim()).filter(Boolean);
-    if (!start.trim()) return toast.error("Add a starting location");
-    if (cleanStops.length < 1) return toast.error("Add at least one stop");
+    if (!start.trim()) {
+      toast.error("Add a starting location");
+      return;
+    }
+    if (cleanStops.length < 1) {
+      toast.error("Add at least one stop");
+      return;
+    }
     const day = new Date().getDay();
     mutation.mutate({
       start: start.trim(),
