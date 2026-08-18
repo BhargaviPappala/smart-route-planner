@@ -17,7 +17,7 @@ export const optimizeRoute = createServerFn({ method: "POST" })
     const places = [];
     // Nominatim allows ~1 request/second: geocode sequentially with throttling + one retry.
     for (const [i, q] of queries.entries()) {
-      if (i > 0) await new Promise((r) => setTimeout(r, 1200));
+      if (i > 0) await new Promise((r) => setTimeout(r, 350));
       try {
         places.push(await geocode(q));
       } catch (err) {

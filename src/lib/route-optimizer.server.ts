@@ -27,6 +27,7 @@ export interface OptimizedRoute {
 
 const OSRM = "https://router.project-osrm.org";
 const NOMINATIM = "https://nominatim.openstreetmap.org";
+const PHOTON = "https://photon.komoot.io";
 const UA = "AI-Route-Optimizer/1.0 (portfolio project)";
 
 /** Resolve a free-text address or "lat,lon" pair into coordinates. */
@@ -39,6 +40,31 @@ export async function geocode(query: string): Promise<Place> {
       return { label: `${lat.toFixed(5)}, ${lon.toFixed(5)}`, lat, lon };
     }
   }
+  // Primary: Photon (good POI coverage). Fallback: Nominatim.
+  const photon = await fetch(`${PHOTON}/api/?limit=1&q=${encodeURIComponent(query)}`, {
+    headers: { "User-Agent": UA, Accept: "application/json" },
+  }).catch(() => null);
+  if (photon?.ok) {
+    const geo = (await photon.json()) as {
+      features?: Array<{
+        geometry: { coordinates: [number, number] };
+        properties: Record<string, string>;
+      }>;
+    };
+    const f = geo.features?.[0];
+    if (f) {
+      const pr = f.properties;
+      const label = [pr["name"], pr["street"], pr["city"] ?? pr["district"], pr["country"]]
+        .filter(Boolean)
+        .join(", ");
+      return {
+        label: label || query,
+        lat: f.geometry.coordinates[1],
+        lon: f.geometry.coordinates[0],
+      };
+    }
+  }
+
   const url = `${NOMINATIM}/search?format=json&limit=1&q=${encodeURIComponent(query)}`;
   const res = await fetch(url, { headers: { "User-Agent": UA, Accept: "application/json" } });
   if (!res.ok) throw new Error(`Geocoding failed for "${query}"`);
