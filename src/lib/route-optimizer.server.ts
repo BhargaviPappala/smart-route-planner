@@ -45,9 +45,9 @@ export async function geocode(query: string): Promise<Place> {
   const data = (await res.json()) as Array<{ lat: string; lon: string; display_name: string }>;
   if (!data.length) throw new Error(`No location found for "${query}"`);
   return {
-    label: data[0].display_name.split(",").slice(0, 3).join(",").trim(),
-    lat: Number(data[0].lat),
-    lon: Number(data[0].lon),
+    label: data[0]!.display_name.split(",").slice(0, 3).join(",").trim(),
+    lat: Number(data[0]!.lat),
+    lon: Number(data[0]!.lon),
   };
 }
 
@@ -97,13 +97,13 @@ export function trafficFactor(hour: number, weekend: boolean) {
     0.85, 0.82, 0.8, 0.8, 0.84, 0.95, 1.12, 1.32, 1.4, 1.22, 1.08, 1.05, 1.1, 1.08, 1.06, 1.14,
     1.3, 1.45, 1.38, 1.2, 1.05, 0.96, 0.9, 0.87,
   ];
-  const f = base[((hour % 24) + 24) % 24];
+  const f = base[((hour % 24) + 24) % 24]!;
   return weekend ? 1 + (f - 1) * 0.45 : f;
 }
 
 function tourCost(order: number[], cost: number[][]) {
   let total = 0;
-  for (let i = 0; i < order.length - 1; i++) total += cost[order[i]][order[i + 1]];
+  for (let i = 0; i < order.length - 1; i++) total += cost[order[i]!]![order[i + 1]!]!;
   return total;
 }
 
@@ -117,8 +117,8 @@ function solveTsp(cost: number[][]): number[] {
     let best = -1;
     let bestCost = Infinity;
     for (let j = 0; j < n; j++) {
-      if (!visited.has(j) && cost[last][j] < bestCost) {
-        bestCost = cost[last][j];
+      if (!visited.has(j) && cost[last!]![j]! < bestCost) {
+        bestCost = cost[last!]![j]!;
         best = j;
       }
     }
@@ -205,7 +205,7 @@ export async function optimize(
   // Eco mode penalises stop-and-go distance more heavily; fastest weights predicted traffic.
   const cost = distances.map((row, i) =>
     row.map((d, j) => {
-      const t = durations[i][j] * factor;
+      const t = durations[i]![j]! * factor;
       if (preference === "shortest") return d;
       if (preference === "fastest") return t;
       return d * 0.7 + t * 0.3;
@@ -213,7 +213,7 @@ export async function optimize(
   );
 
   const order = solveTsp(cost);
-  const ordered = order.map((i) => places[i]);
+  const ordered = order.map((i) => places[i]!);
   const naiveDistanceKm = tourCost(
     places.map((_, i) => i),
     distances,
