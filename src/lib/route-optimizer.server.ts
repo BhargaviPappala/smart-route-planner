@@ -43,11 +43,7 @@ export async function geocode(query: string): Promise<Place> {
   // Primary: Photon (good POI coverage). Fallback: Nominatim.
   const photon = await fetch(`${PHOTON}/api/?limit=1&q=${encodeURIComponent(query)}`, {
     headers: { "User-Agent": UA, Accept: "application/json" },
-  }).catch((e) => {
-    console.error("photon fetch failed", e);
-    return null;
-  });
-  console.log("photon status", photon?.status);
+  }).catch(() => null);
   if (photon?.ok) {
     const geo = (await photon.json()) as {
       features?: Array<{

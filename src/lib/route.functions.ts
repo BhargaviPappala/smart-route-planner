@@ -10,7 +10,7 @@ const schema = z.object({
 });
 
 export const optimizeRoute = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => schema.parse(data))
+  .validator((data: unknown) => schema.parse(data))
   .handler(async ({ data }) => {
     const { geocode, optimize } = await import("./route-optimizer.server");
     const queries = [data.start, ...data.stops];
