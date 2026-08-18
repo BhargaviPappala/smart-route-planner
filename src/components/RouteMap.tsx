@@ -29,7 +29,7 @@ function FitBounds({ points }: { points: [number, number][] }) {
   return null;
 }
 
-function ClickHandler({ onPick }: { onPick?: (lat: number, lon: number) => void }) {
+function ClickHandler({ onPick }: { onPick?: ((lat: number, lon: number) => void) | undefined }) {
   useMapEvents({
     click(e) {
       onPick?.(e.latlng.lat, e.latlng.lng);
@@ -45,7 +45,7 @@ export default function RouteMap({
 }: {
   points: MapPoint[];
   geometry: [number, number][];
-  onPick?: (lat: number, lon: number) => void;
+  onPick?: ((lat: number, lon: number) => void) | undefined;
 }) {
   const all: [number, number][] = geometry.length
     ? geometry
